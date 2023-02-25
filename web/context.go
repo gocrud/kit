@@ -149,6 +149,21 @@ func (c *Context) BizData(data any) ICustomResp {
 //	    "name": "张三"
 //	  }
 //	}
+
+// Biz 业务数据,可以指定code和msg
+//
+// http status: 200
+//
+// example:
+//
+//	{
+//	  "code": 0,
+//	  "msg": "success",
+//	  "data": {
+//	    "id": 1,
+//	    "name": "张三"
+//	  }
+//	}
 func (c *Context) Biz(code int, msg string, data any) ICustomResp {
 	return &biz{
 		status: 200,

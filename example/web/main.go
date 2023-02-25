@@ -24,7 +24,7 @@ type Greeter struct {
 }
 
 func (g Greeter) Routes(ctx *web.RouteContext) {
-	ctx.Std.POST("/hello", ctx.Handle(g.SayHello))
+	ctx.POST("/hello", ctx.Handle(g.SayHello))
 }
 
 type helloReq struct {

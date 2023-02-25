@@ -32,8 +32,8 @@ func Cors() gin.HandlerFunc {
 }
 
 type RouteContext struct {
-	Std  gin.IRoutes
-	Safe gin.IRoutes
+	gin.IRoutes
+	Auth gin.IRoutes
 }
 
 func (r *RouteContext) Handle(fn func(ctx *Context) any) gin.HandlerFunc {
@@ -72,7 +72,6 @@ type IRoute interface {
 
 type Server struct {
 	host           string
-	isDebug        bool
 	routes         []IRoute
 	authMiddleware gin.HandlerFunc
 	g              *gin.Engine
@@ -80,13 +79,6 @@ type Server struct {
 
 // ServerOption Server Option type
 type ServerOption func(*Server)
-
-// WithServerIsDebug 设置debug模式
-func WithServerIsDebug(isDebug bool) ServerOption {
-	return func(s *Server) {
-		s.isDebug = isDebug
-	}
-}
 
 // WithServerHost 设置host
 func WithServerHost(host string) ServerOption {
@@ -111,9 +103,7 @@ func WithAuthMiddleware(authMiddleware gin.HandlerFunc) ServerOption {
 
 // NewServer 创建一个新的Server,默认debug模式
 func NewServer(opts ...ServerOption) (*Server, error) {
-	s := &Server{
-		isDebug: true,
-	}
+	s := &Server{}
 	for _, opt := range opts {
 		opt(s)
 	}
@@ -131,10 +121,6 @@ func NewServer(opts ...ServerOption) (*Server, error) {
 }
 
 func (s *Server) setHttpServer() {
-	if !s.isDebug {
-		gin.SetMode(gin.ReleaseMode)
-	}
-
 	r := gin.New()
 	r.Use(Cors())
 	r.Use(gin.Recovery())
@@ -142,8 +128,8 @@ func (s *Server) setHttpServer() {
 	authRoute := r.Group("", s.authMiddleware)
 	// 注册路由
 	routeContext := &RouteContext{
-		Std:  r,
-		Safe: authRoute,
+		IRoutes: r,
+		Auth:    authRoute,
 	}
 
 	for _, route := range s.routes {
@@ -190,24 +176,19 @@ func (s *Server) Run() {
 	log.Println("Server exiting")
 }
 
-// getFreeHost 获取一个空闲的host,如果未指定host，开发模式下动态获取有效服务端host,生产模式下使用默认端口80
+// getFreeHost
 func (s *Server) getFreeHost() error {
 	if s.host != "" {
 		return nil
 	}
 
-	// 判读是否debug模式
-	if s.isDebug {
-		ln, err := net.Listen("tcp", ":0")
-		if err != nil {
-			return err
-		}
-		defer ln.Close()
-		port := ln.Addr().(*net.TCPAddr).Port
-		s.host = fmt.Sprintf(":%d", port)
-		return nil
+	ln, err := net.Listen("tcp", ":0")
+	if err != nil {
+		return err
 	}
+	defer ln.Close()
+	port := ln.Addr().(*net.TCPAddr).Port
+	s.host = fmt.Sprintf(":%d", port)
 
-	s.host = ":80"
 	return nil
 }
