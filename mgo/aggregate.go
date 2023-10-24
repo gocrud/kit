@@ -109,7 +109,7 @@ func (a *Aggregate) IndexStats(indexStats bson.M) *Aggregate {
 	return a
 }
 
-func (a *Aggregate) Limit(limit bson.M) *Aggregate {
+func (a *Aggregate) Limit(limit int64) *Aggregate {
 	a.pipes = append(a.pipes, bson.D{{Key: "$limit", Value: limit}})
 	return a
 }
@@ -179,7 +179,7 @@ func (a *Aggregate) SetWindowFields(setWindowFields bson.M) *Aggregate {
 	return a
 }
 
-func (a *Aggregate) Skip(skip bson.M) *Aggregate {
+func (a *Aggregate) Skip(skip int64) *Aggregate {
 	a.pipes = append(a.pipes, bson.D{{Key: "$skip", Value: skip}})
 	return a
 }
