@@ -69,8 +69,8 @@ func (a *Aggregate) CollStats(collStats bson.M) *Aggregate {
 	return a
 }
 
-func (a *Aggregate) Count(count bson.M) *Aggregate {
-	a.pipes = append(a.pipes, bson.D{{Key: "$count", Value: count}})
+func (a *Aggregate) Count(field string) *Aggregate {
+	a.pipes = append(a.pipes, bson.D{{Key: "$count", Value: field}})
 	return a
 }
 
